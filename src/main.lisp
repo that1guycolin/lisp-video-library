@@ -54,27 +54,47 @@ Each item contains the following keys:
             Example: \"Meryl Streep; George Clooney\"
 `:studio' - String containing the production studio.")
 
+(defparameter *queue-lock* (sb-thread:make-mutex :name "download-queue-lock"))
+
+
+;;; User configurable variables
 (defvar *db-extension* ".lvl.db.lisp"
   "Extension for database files containing *local-video-objects*.")
-
-(defparameter *queue-lock* (sb-thread:make-mutex :name "download-queue-lock"))
 
 (defvar *download-directory* (uiop:native-namestring "~/Videos/New/")
   "Directory into which videos are downloaded.")
 
-(defvar *logfile* (uiop:native-namestring
-                   (concat *download-directory* "downloaded_vids.txt"))
-  "Information on the videos processed/downloaded is saved to this file.")
+(defvar *logfile-filename* "downloaded_vids.txt"
+  "The filename of the 'log' file.")
+
+(defvar *atomic-parsley-cmd* "atomicparsley"
+  "The name of the atomicparsley command. Typically `atomicparsley` or `AtomicParsley`.")
+
+(defun set-local-variables (&key db-ext dl-dir logf ap-cmd)
+  (unless (or db-ext dl-dir logf ap-cmd)
+    (error "At least one keyword argument is required"))
+  (when db-ext
+    (setf *db-extension* db-ext))
+  (when dl-dir
+    (setf *download-directory* dl-dir))
+  (when logf
+    (setf *logfile-filename* logf))
+  (when ap-cmd
+    (setf *atomic-parsley-command* ap-cmd)))
 
 
 ;;; Logfile functions
+(defun logfile ()
+  "Return a file in *download-directory* into which records are saved."
+  (merge-pathnames *logfile-filename*
+                   (uiop:ensure-directory-pathname *download-directory*)))
+
 (defun new-video-to-logfile (rvo)
-  "Write a `remote-video-object' (RVO) to `*logfile*'."
-  (with-open-file
-      (out *logfile*
-           :direction :output
-           :if-exists :append
-           :if-does-not-exist :create)
+  "Write a `remote-video-object' (RVO) to #'logfile."
+  (with-open-file      (out (logfile)
+			    :direction :output
+			    :if-exists :append
+			    :if-does-not-exist :create)
     (with-standard-io-syntax (print rvo out))))
 
 (defun remote-video-objects-same-url-p (rvo1 rvo2)
@@ -84,9 +104,9 @@ Each item contains the following keys:
     (string= u1 u2)))
 
 (defun remote-objects-from-logfile ()
-  "Read all `remote-video-objects' from `*logfile*'."
+  "Read all `remote-video-objects' from #'logfile."
   (with-open-file
-      (in *logfile*
+      (in (logfile)
           :direction :input
           :if-does-not-exist nil)
     (when in
@@ -97,7 +117,7 @@ Each item contains the following keys:
                 collect obj)))))
 
 (defun update-logfile (rvo)
-  "Update `*logfile*' with RVO, overwriting any existing entry for that video."
+  "Update #'logfile with RVO, overwriting any existing entry for that video."
   (let* ((existing-objects (remote-objects-from-logfile))
          (found nil)
          (updated-objects
@@ -109,7 +129,7 @@ Each item contains the following keys:
     (unless found
       (setf updated-objects (append updated-objects (list rvo))))
     (with-open-file
-        (out *logfile*
+        (out (logfile)
              :direction :output
              :if-exists :supersede
              :if-does-not-exist :create)
@@ -298,7 +318,7 @@ If it is not, add it."
   "Use AtomicParsley to add metadata to a video file.
 Uses the metadata contained in the video's `local-video-object'."
   (uiop:run-program
-   (list "atomicparsley" (local-video-object-path obj)
+   (list *atomic-parsley-cmd* (local-video-object-path obj)
          "--artist"      (local-video-object-artist obj)
          "--album"       (local-video-object-studio obj)
          "--title"       (local-video-object-title obj)
@@ -314,7 +334,7 @@ Function assumes filename is formatted \"ARTIST - ALBUM - TITLE.ext\"."
          (str-list (split " - " filename :omit-nulls t)))
     (destructuring-bind (artist studio title) str-list
       (uiop:run-program
-       (list "atomicparsley" filepath "--artist" artist "--album" studio
+       (list *atomic-parsley-cmd* filepath "--artist" artist "--album" studio
              "--title" title "--overWrite")
        :output :interactive
        :error-output :interactive))))
@@ -325,15 +345,15 @@ ARTIST, STUDIO, and TITLE are all possible metadata fields."
   (let ((filepath (uiop:native-namestring file)))
     (when artist
       (uiop:run-program
-       (list "atomicparsley" filepath "--artist" artist "--overWrite")
+       (list *atomic-parsley-cmd* filepath "--artist" artist "--overWrite")
        :output :interactive :error-output :interactive))
     (when studio
       (uiop:run-program
-       (list "atomicparsley" filepath "--album"  studio "--overWrite")
+       (list *atomic-parsley-cmd* filepath "--album"  studio "--overWrite")
        :output :interactive :error-output :interactive))
     (when title
       (uiop:run-program
-       (list "atomicparsley" filepath "--title"  title  "--overWrite")
+       (list *atomic-parsley-cmd* filepath "--title"  title  "--overWrite")
        :output :interactive :error-output :interactive))))
 
 

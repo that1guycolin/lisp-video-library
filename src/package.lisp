@@ -9,8 +9,7 @@
   (:documentation "Manage the videos in your media library with cl.")
   (:import-from #:str #:trim #:split #:concat)
   (:export #:*remote-video-objects* #:*local-video-objects*
-           #:*db-extension* #:*download-directory*
-           #:iav #:add-remote-video #:download-queued-videos
-           #:script/process-file))
+           #:set-local-variables #:iav #:add-remote-video
+           #:download-queued-videos #:script/process-file))
 
 (in-package #:lvl)
