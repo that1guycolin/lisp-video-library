@@ -80,7 +80,7 @@ Each item contains the following keys:
   (when logf
     (setf *logfile-filename* logf))
   (when ap-cmd
-    (setf *atomic-parsley-command* ap-cmd)))
+    (setf *atomic-parsley-cmd* ap-cmd)))
 
 
 ;;; Logfile functions
