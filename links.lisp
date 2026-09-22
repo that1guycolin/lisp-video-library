@@ -5,22 +5,26 @@
 ;;   sbcl --script downloader.lisp THIS_FILE.lisp
 ;; #+END_SRC
 
-
-((:status :todo
-  :method :
-  :url ""
-  :title ""
-  :artist ""
-  :album "")
- (:status :todo
-  :method :
-  :url ""
-  :title ""
-  :artist ""
-  :album "")
- (:status :todo
-  :method :
-  :url ""
-  :title ""
-  :artist ""
-  :album ""))
+(
+ (#S(lvl:remote-video-object
+     :status :todo
+     :method :
+     :url ""
+     :title ""
+     :artist ""
+     :album ""))
+ (#S(lvl:remote-video-object
+     :status :todo
+     :method :
+     :url ""
+     :title ""
+     :artist ""
+     :album ""))
+ (#S(lvl:remote-video-object
+     :status :todo
+     :method :
+     :url ""
+     :title ""
+     :artist ""
+     :album ""))
+ )
