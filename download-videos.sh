@@ -15,6 +15,6 @@ while [ -h "$SOURCE" ]; do
 done
 LVL_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
 
-SCRIPT_FILE="${LVL_DIR}/src/downloader-script.lisp"
+SCRIPT_FILE="${LVL_DIR}/script.lisp"
 
 sbcl --script "$SCRIPT_FILE" "$1"

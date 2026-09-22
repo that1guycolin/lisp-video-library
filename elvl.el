@@ -1,4 +1,4 @@
-;;; easy-link.el --- EZ Lisp Links -*- lexical-binding: t -*-
+;;; elvl.el --- EZ Lisp Links -*- lexical-binding: t -*-
 
 ;; Author: Colin Loeffler
 ;; Version: 0.1.0
@@ -25,7 +25,7 @@
 ;; Easily create a Lisp object that can be used by downloader.lisp.
 
 ;;; Code:
-(defun easy-link-insert-video (url method title artist album)
+(defun elvl-insert-video (url method title artist album)
   "Create a link block for use with lisp-video-library downloader.lisp.
 Requires URL (link to video (not website link)); METHOD by which video
 will be downloaded, options are ffmpeg, yt-dlp, streamlink, aria2, or convert;
@@ -34,18 +34,18 @@ TITLE of the video; video ARTIST and video ALBUM."
    (list
     (read-string "URL: ")
     (completing-read "Method: " '(:ffmpeg :yt-dlp :streamlink :aria2
-					  :convert))
+                                          :convert))
     (read-string "Title: ")
     (read-string "Artist: ")
     (read-string "Album: ")))
 
   (insert "(:status :todo"
-	  "\n:method " method
-	  "\n:url \"" url "\""
-	  "\n:title \"" title "\""
-	  "\n:artist \"" artist "\""
-	  "\n:album \"" album "\")"))
+          "\n:method " method
+          "\n:url \"" url "\""
+          "\n:title \"" title "\""
+          "\n:artist \"" artist "\""
+          "\n:album \"" album "\")"))
 
 
-(provide 'easy-link)
-;;; easy-link.el ends here
+(provide 'elvl)
+;;; elvl.el ends here
